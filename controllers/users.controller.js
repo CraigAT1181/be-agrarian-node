@@ -22,16 +22,10 @@ const {
   exports.addUser = async (req, res, next) => {
     try {
       const {
-        email,
-        password,
-        full_name,
-        handle,
-        telephone,
-        birthday,
-        bio,
-        country,
-        city,
-        county,
+email, 
+password, 
+username, 
+postcode,
       } = req.body;
       
       const file = req.file;
@@ -51,16 +45,10 @@ const {
   
       const userDetails = {
         auth_user_id: authUserId,
-        full_name,
-        handle,
+        user_name: username,
         email,
-        telephone,
+        postcode,
         profile_pic: profilePicUrl,
-        birthday,
-        bio,
-        country,
-        city,
-        county,
       };
   
       const user = await insertUserDetails(userDetails);

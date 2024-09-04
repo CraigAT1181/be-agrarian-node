@@ -71,9 +71,10 @@ exports.uploadProfilePicture = async (authUserId, file) => {
 exports.insertUserDetails = async (userDetails) => {
   const {
     auth_user_id,
-    username,
+    user_name,
     email,
     postcode,
+    profile_pic,
   } = userDetails;
 
   const { data, error } = await supabase
@@ -81,9 +82,10 @@ exports.insertUserDetails = async (userDetails) => {
     .insert([
       {
         auth_user_id,
-        username,
+        user_name,
         email,
         postcode,
+        profile_pic,
       },
     ])
     .select("*");
