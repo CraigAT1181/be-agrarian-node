@@ -3,8 +3,7 @@ const multer = require('multer');
 const path = require('path');
 
 const { getEndpoints } = require("./controllers/api.controller");
-// const { getUsers, addUser, loginUser, deleteUser, getUserInfo, logout } = require("./controllers/users.controller");
-// const { getPosts, getSinglePost } = require("./controllers/posts.controller");
+const { getUsers, addUser, loginUser, deleteUser, getUserInfo, logout } = require("./controllers/users.controller");
 
 const {
   handleCustomErrors,
@@ -12,7 +11,6 @@ const {
 } = require("./controllers/errors.controller");
 
 const cors = require("cors");
-
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -35,15 +33,12 @@ app.use(cors());
 // Routing
 app.get("/", getEndpoints);
 app.get("/api", getEndpoints);
-// app.get("/users", getUsers);
-// app.post("/users", upload.single('profile-pic'), addUser);
-// app.post("/users/login", loginUser);
-// app.get("/users/authenticate", getUserInfo);
-// app.post("/users/logout", logout)
-// app.delete("/users/:user_id", deleteUser);
-
-// app.get("/posts", getPosts)
-// app.get("/posts/:postId", getSinglePost)
+app.get("/users", getUsers);
+app.post("/users", upload.single('profile-pic'), addUser);
+app.post("/users/login", loginUser);
+app.get("/users/authenticate", getUserInfo);
+app.post("/users/logout", logout)
+app.delete("/users/:user_id", deleteUser);
 
 // Error-handling
 app.use(handleCustomErrors);
