@@ -1,9 +1,7 @@
 const supabase = require("../config/supabase");
 
 exports.fetchUsers = async () => {
-  const { data, error } = await supabase
-    .from("users")
-    .select("*");
+  const { data, error } = await supabase.from("users").select("*");
 
   if (error) {
     throw error;
@@ -43,39 +41,64 @@ exports.uploadProfilePicture = async (authUserId, file) => {
     const fileName = `${authUserId}/${Date.now()}_${file.originalname}`;
 
     const { data, error } = await supabase.storage
-    .from('profile-pictures')
-    .upload(fileName, file.buffer, {
-      cacheControl: '3600',
-      upsert: false,
-      contentType: file.mimetype,
-    });
+      .from("profile-pictures")
+      .upload(fileName, file.buffer, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.mimetype,
+      });
 
     if (error) {
       console.error("Error uploading profile picture:", error);
       throw error;
     }
 
-    const { data: publicUrlData } = supabase
-      .storage
-      .from('profile-pictures')
+    const { data: publicUrlData } = supabase.storage
+      .from("profile-pictures")
       .getPublicUrl(fileName);
 
     return publicUrlData.publicUrl;
-
   } catch (error) {
     console.error("Error in uploadProfilePicture:", error);
     throw error;
   }
-}
+};
+
+exports.fetchTownAllotmentID = async (townName, allotmentName) => {
+  try {
+    const { data: townData, error: townError } = await supabase
+      .from("towns")
+      .select("town_id")
+      .eq("town_name", townName)
+      .single();
+
+    if (townError || !townData) {
+      throw new Error(`Town not found for name: ${townName}`);
+    }
+
+    const { data: allotmentData, error: allotmentError } = await supabase
+      .from("allotments")
+      .select("allotment_id")
+      .eq("allotment_name", allotmentName)
+      .single();
+
+    if (allotmentError || !allotmentData) {
+      throw new Error(`Allotment not found for name: ${allotmentName}`);
+    }
+
+    return {
+      town_id: townData.town_id,
+      allotment_id: allotmentData.allotment_id,
+    };
+  } catch (error) {
+    console.error("Error fetching town or allotment ID:", error);
+    throw error;
+  }
+};
+
 
 exports.insertUserDetails = async (userDetails) => {
-  const {
-    auth_user_id,
-    user_name,
-    email,
-    postcode,
-    profile_pic,
-  } = userDetails;
+  const { auth_user_id, user_name, email, town_id, allotment_id, plot, profile_pic } = userDetails;
 
   const { data, error } = await supabase
     .from("users")
@@ -84,14 +107,15 @@ exports.insertUserDetails = async (userDetails) => {
         auth_user_id,
         user_name,
         email,
-        postcode,
+        town_id,
+        allotment_id,
+        plot,
         profile_pic,
       },
     ])
     .select("*");
 
   if (error) {
-
     if (error.code === "23505") {
       if (error.message.includes("email")) {
         throw new Error("Email already exists");
@@ -127,27 +151,27 @@ exports.signInUser = async (email, password) => {
 };
 
 exports.authenticateUser = async (token) => {
-
   try {
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      throw new Error('Invalid token');
+      throw new Error("Invalid token");
     }
 
     return user;
-    
   } catch (error) {
     throw error;
   }
 };
 
 exports.getUserById = async (user_id) => {
-
   const trimmedID = user_id.trim();
   const { data, error } = await supabase
     .from("users")
-    .select("*")
+    .select("*, towns(town_name), allotments(allotment_name)")
     .eq("auth_user_id", trimmedID)
     .single();
 
@@ -169,15 +193,15 @@ exports.logUserOut = async () => {
     const { error } = await supabase.auth.signOut();
 
     if (error) {
-      throw new Error('Error during sign out');
+      throw new Error("Error during sign out");
     }
 
-    return {"message": "Signed out successfully."};
+    return { message: "Signed out successfully." };
   } catch (error) {
     console.error("Error signing out", error);
-    next(error);
+    throw error;
   }
-}
+};
 
 exports.deleteUserById = async (userId) => {
   const { error } = await supabase.auth.admin.deleteUser(userId);
@@ -186,5 +210,28 @@ exports.deleteUserById = async (userId) => {
     throw new Error(error.message);
   }
 
-  return { message: 'User deleted successfully' };
-}
+  return { message: "User deleted successfully" };
+};
+
+exports.fetchAllotmentPosts = async (allotment_id) => {
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("allotment_id", allotment_id);
+
+    if (error) {
+      console.error("Error fetching allotment:", error);
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error("No allotment found with the provided allotment_id.");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error caught in catch block:", error);
+    throw error;
+  }
+};
