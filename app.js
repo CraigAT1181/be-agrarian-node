@@ -3,8 +3,8 @@ const multer = require('multer');
 const path = require('path');
 
 const { getEndpoints } = require("./controllers/api.controller");
-const { getUsers, addUser, loginUser, deleteUser, getUserInfo, logout, getAllotmentPosts } = require("./controllers/users.controller");
-
+const { getUsers, addUser, loginUser, deleteUser, getUserInfo, logout } = require("./controllers/users.controller");
+const { getAllotmentPosts, getTownPosts, getSinglePost, addPost } = require("./controllers/posts.controller");
 const {
   handleCustomErrors,
   handle500errors,
@@ -39,7 +39,11 @@ app.post("/users/login", loginUser);
 app.get("/users/authenticate", getUserInfo);
 app.post("/users/logout", logout)
 app.delete("/users/:user_id", deleteUser);
+
 app.get("/posts/allotments/:allotment_id", getAllotmentPosts);
+app.get("/posts/towns/:town_id", getTownPosts);
+app.get("/post/:postId", getSinglePost);
+app.post("/posts", upload.array('media-files'), addPost);
 
 // Error-handling
 app.use(handleCustomErrors);

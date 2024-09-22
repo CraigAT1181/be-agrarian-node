@@ -212,26 +212,3 @@ exports.deleteUserById = async (userId) => {
 
   return { message: "User deleted successfully" };
 };
-
-exports.fetchAllotmentPosts = async (allotment_id) => {
-  try {
-    const { data, error } = await supabase
-      .from("posts")
-      .select("*")
-      .eq("allotment_id", allotment_id);
-
-    if (error) {
-      console.error("Error fetching allotment:", error);
-      throw error;
-    }
-
-    if (!data) {
-      throw new Error("No allotment found with the provided allotment_id.");
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Error caught in catch block:", error);
-    throw error;
-  }
-};

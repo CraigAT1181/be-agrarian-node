@@ -8,7 +8,6 @@ const {
   deleteUserById,
   authenticateUser,
   logUserOut,
-  fetchAllotmentPosts,
   fetchTownAllotmentID,
 } = require("../models/users.model");
 
@@ -111,17 +110,6 @@ exports.deleteUser = async (req, res, next) => {
   try {
     const result = await deleteUserById(user_id);
     res.status(200).json(result);
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.getAllotmentPosts = async (req, res, next) => {
-  const allotment_id = req.params.allotment_id;
-
-  try {
-    const allotmentPosts = await fetchAllotmentPosts(allotment_id);
-    res.status(200).json({ posts: allotmentPosts });
   } catch (error) {
     next(error);
   }
