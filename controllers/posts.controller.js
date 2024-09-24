@@ -1,4 +1,4 @@
-const {fetchAllotmentPosts, fetchTownPosts, fetchPostWithParent, fetchReplies, postNewPost, uploadPostMedia, savePostMedia} = require("../models/posts.model")
+const {fetchAllotmentPosts, fetchTownPosts, fetchPostWithParent, fetchReplies, postNewPost, uploadPostMedia, savePostMedia, removePost, deleteMediaFromStorage} = require("../models/posts.model")
 
 exports.getAllotmentPosts = async (req, res, next) => {
     const { allotment_id } = req.params;
@@ -70,3 +70,34 @@ exports.getAllotmentPosts = async (req, res, next) => {
       next(error);
     }
   };
+
+  exports.deletePost = async (req, res, next) => {
+
+    const {post_id} = req.body;
+
+    if (!post_id) {
+        return res.status(400).json({ error: "post_id is required" });
+      }
+
+      try {
+
+        const { error: postError } = await removePost(post_id);
+
+        if (postError) {
+          return res.status(500).json({ error: postError.message });
+        }
+    
+          // Delete the media files from Supabase storage by removing the folder named after post_id
+const { error: storageError } = await deleteMediaFromStorage(post_id);
+
+if (storageError) {
+    return res.status(500).json({ error: storageError.message });
+  }
+
+         return   res.status(204).send();
+    
+        
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+  }

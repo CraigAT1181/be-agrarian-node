@@ -4,7 +4,7 @@ const path = require('path');
 
 const { getEndpoints } = require("./controllers/api.controller");
 const { getUsers, addUser, loginUser, deleteUser, getUserInfo, logout } = require("./controllers/users.controller");
-const { getAllotmentPosts, getTownPosts, getSinglePost, addPost } = require("./controllers/posts.controller");
+const { getAllotmentPosts, getTownPosts, getSinglePost, addPost, deletePost } = require("./controllers/posts.controller");
 const {
   handleCustomErrors,
   handle500errors,
@@ -44,6 +44,7 @@ app.get("/posts/allotments/:allotment_id", getAllotmentPosts);
 app.get("/posts/towns/:town_id", getTownPosts);
 app.get("/post/:postId", getSinglePost);
 app.post("/posts", upload.array('media-files'), addPost);
+app.delete("/posts", deletePost);
 
 // Error-handling
 app.use(handleCustomErrors);

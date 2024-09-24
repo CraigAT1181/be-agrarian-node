@@ -17,7 +17,7 @@ exports.fetchAllotmentPosts = async (allotment_id) => {
           user_name,
           plot
         ),
-        media (
+        posts_media (
           media_url
         )
         `)
@@ -59,7 +59,7 @@ exports.fetchAllotmentPosts = async (allotment_id) => {
               user_name,
               allotment_id
             ),
-            media (
+            posts_media (
               media_url
             )
           `
@@ -107,7 +107,7 @@ exports.fetchPostWithParent = async (postId) => {
           allotment_id,
           plot
         ),
-        media (
+        posts_media (
           media_url
         )
       `
@@ -138,7 +138,7 @@ exports.fetchPostWithParent = async (postId) => {
               allotment_id,
               plot
             ),
-            media (
+            posts_media (
               media_url
             )
           `
@@ -181,7 +181,7 @@ exports.fetchReplies = async (postId) => {
               allotment_id,
               plot
             ),
-            media (
+            posts_media (
               media_url
             )
           `
@@ -289,3 +289,56 @@ exports.fetchReplies = async (postId) => {
       throw error;
     }
   };
+
+
+  exports.removePost = async (post_id) => {
+    try {
+        const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('post_id', post_id);
+
+        return { error };
+    } catch (error) {
+        console.error("Error deleting post", error);
+        throw error;
+    }
+  };
+
+  exports.deleteMediaFromStorage = async (post_id) => {
+    const bucketName = 'post-media';
+    const folderPath = `${post_id}/`; // Assuming folder named after post_id
+  
+    // List files in the folder to check if they exist
+    const { data: files, error: listError } = await supabase
+      .storage
+      .from(bucketName)
+      .list(folderPath);
+  
+    if (listError) {
+      console.error("Error listing files:", listError);
+      return { error: listError };
+    }
+  
+    if (!files || files.length === 0) {
+      console.log("No files found to delete in folder:", folderPath);
+      return { error: null };  // No files to delete
+    }
+  
+    // Extract file paths to delete
+    const filePaths = files.map(file => `${folderPath}${file.name}`);
+  
+    // Attempt to delete the files
+    const { error: deleteError } = await supabase
+      .storage
+      .from(bucketName)
+      .remove(filePaths);
+  
+    if (deleteError) {
+      console.error("Error deleting files:", deleteError);
+    }
+  
+    return { error: deleteError };
+  };
+  
+  
