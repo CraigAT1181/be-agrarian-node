@@ -112,7 +112,7 @@ exports.fetchPostWithParent = async (postId) => {
         )
       `
       )
-      .eq("id", postId)
+      .eq("post_id", postId)
       .single();
 
     if (postError) throw postError;
@@ -143,7 +143,7 @@ exports.fetchPostWithParent = async (postId) => {
             )
           `
           )
-        .eq("id", post.parent_id)
+        .eq("post_id", post.parent_id)
         .single();
 
       if (parentError) {
@@ -321,7 +321,7 @@ exports.fetchReplies = async (postId) => {
     }
   
     if (!files || files.length === 0) {
-      console.log("No files found to delete in folder:", folderPath);
+      console.log("No files found to delete in folder:", folderPath);   
       return { error: null };  // No files to delete
     }
   
