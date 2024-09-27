@@ -57,7 +57,9 @@ exports.fetchAllotmentPosts = async (allotment_id) => {
             users (
               profile_pic,
               user_name,
-              allotment_id
+              allotments (
+                allotment_name
+              )
             ),
             posts_media (
               media_url
