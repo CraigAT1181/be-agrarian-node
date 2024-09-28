@@ -12,6 +12,7 @@ exports.fetchAllotmentPosts = async (allotment_id) => {
         parent_id,
         is_reply,
         reply_count,
+        scope,
         users (
           profile_pic,
           user_name,
@@ -54,6 +55,7 @@ exports.fetchAllotmentPosts = async (allotment_id) => {
             parent_id,
             is_reply,
             reply_count,
+            scope,
             users (
               profile_pic,
               user_name,
@@ -102,12 +104,16 @@ exports.fetchPostWithParent = async (postId) => {
         parent_id,
         is_reply,
         reply_count,
+        scope,
         users (
           profile_pic,
           user_name,
           town_id,
           allotment_id,
-          plot
+          plot,
+          allotments (
+            allotment_name
+          )
         ),
         posts_media (
           media_url
@@ -133,12 +139,16 @@ exports.fetchPostWithParent = async (postId) => {
             parent_id,
             is_reply,
             reply_count,
+            scope,
             users (
               profile_pic,
               user_name,
               town_id,
               allotment_id,
-              plot
+              plot,
+              allotments (
+                allotment_name
+              )
             ),
             posts_media (
               media_url
@@ -176,12 +186,16 @@ exports.fetchReplies = async (postId) => {
             parent_id,
             is_reply,
             reply_count,
+            scope,
             users (
               profile_pic,
               user_name,
               town_id,
               allotment_id,
-              plot
+              plot,
+              allotments (
+                allotment_name
+              )
             ),
             posts_media (
               media_url
