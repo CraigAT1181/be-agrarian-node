@@ -203,7 +203,7 @@ exports.fetchReplies = async (postId) => {
           `
           )
         .eq("parent_id", postId)
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: false });
   
       if (repliesError) throw repliesError;
   

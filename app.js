@@ -43,7 +43,7 @@ app.delete("/users/:user_id", deleteUser);
 app.get("/posts/allotments/:allotment_id", getAllotmentPosts);
 app.get("/posts/towns/:town_id", getTownPosts);
 app.get("/post/:postId", getSinglePost);
-app.post("/posts", upload.array('media-files'), addPost);
+app.post("/posts", upload.array('media_files'), addPost);
 app.delete("/posts", deletePost);
 
 // Error-handling
