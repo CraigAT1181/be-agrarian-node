@@ -45,13 +45,16 @@ exports.getAllotmentPosts = async (req, res, next) => {
       const { user_id, parent_id, content, is_reply, town_id, allotment_id, scope } = req.body;
       const postDetails = {
         user_id,
-        parent_id: parent_id || null,
         content,
         is_reply,
         town_id,
         allotment_id,
         scope
       };
+
+      if (parent_id) {
+        postDetails.parent_id = parent_id;
+      }
   
       const files = req.files;
       const newPost = await postNewPost(postDetails);

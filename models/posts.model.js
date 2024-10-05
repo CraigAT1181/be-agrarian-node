@@ -224,7 +224,7 @@ exports.fetchReplies = async (postId) => {
         .insert([
           {
             user_id,
-            parent_id,
+            ...(parent_id && { parent_id }),
             content,
             is_reply,
             town_id,
