@@ -203,12 +203,61 @@ exports.logUserOut = async () => {
   }
 };
 
-exports.deleteUserById = async (userId) => {
-  const { error } = await supabase.auth.admin.deleteUser(userId);
+exports.deletePublicUser = async (publicUserId) => {
+  const { error } = await supabase
+  .from('users')
+  .delete()
+  .eq('user_id', publicUserId);
+
+if (error) {
+  throw new Error("Error deleting user from public.users table: " + error.message);
+}
+
+  return { message: "User deleted from public table." };
+};
+
+exports.deleteAuthUser = async (authUserId) => {
+  const { error } = await supabase.auth.admin.deleteUser(authUserId);
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error("Error deleting user from auth.users table: " + error.message);
   }
 
-  return { message: "User deleted successfully" };
+  return { message: "User deleted from auth table." };
+};
+
+exports.deleteProfilePicFromStorage = async (auth_id) => {
+  const bucketName = 'profile-pictures';
+  const folderPath = `${auth_id}/`;
+
+  // List files in the folder to check if they exist
+  const { data: files, error: listError } = await supabase
+    .storage
+    .from(bucketName)
+    .list(folderPath);
+
+  if (listError) {
+    console.error("Error listing files:", listError);
+    return { error: listError };
+  }
+
+  if (!files || files.length === 0) {
+    console.log("No files found to delete in folder:", folderPath);   
+    return { error: null };  // No files to delete
+  }
+
+  // Extract file paths to delete
+  const filePaths = files.map(file => `${folderPath}${file.name}`);
+
+  // Attempt to delete the files
+  const { error: deleteError } = await supabase
+    .storage
+    .from(bucketName)
+    .remove(filePaths);
+
+  if (deleteError) {
+    console.error("Error deleting files:", deleteError);
+  }
+
+  return { error: deleteError };
 };

@@ -5,10 +5,12 @@ const {
   uploadProfilePicture,
   insertUserDetails,
   signInUser,
-  deleteUserById,
+  deletePublicUser,
+  deleteAuthUser,
   authenticateUser,
   logUserOut,
   fetchTownAllotmentID,
+  deleteProfilePicFromStorage,
 } = require("../models/users.model");
 
 exports.getUsers = async (req, res, next) => {
@@ -105,11 +107,31 @@ exports.logout = async (req, res, next) => {
 };
 
 exports.deleteUser = async (req, res, next) => {
-  const user_id = req.params.user_id;
+  const public_user_id = req.params.user_id;
+  const auth_user_id = req.params.auth_id;
 
   try {
-    const result = await deleteUserById(user_id);
-    res.status(200).json(result);
+
+    const { error: deletePublicError } = await deletePublicUser(public_user_id);
+
+    if (deletePublicError) {
+      return res.status(500).json({ error: deletePublicError.message });
+    }
+
+    const { error: deleteAuthError } = await deleteAuthUser(auth_user_id);
+
+    if (deleteAuthError) {
+      return res.status(500).json({ error: deleteAuthError.message });
+    }
+
+    const { error: storageError } = await deleteProfilePicFromStorage(auth_user_id);
+
+if (storageError) {
+  return res.status(500).json({ error: storageError.message });
+}
+
+return res.status(204).send();
+
   } catch (error) {
     next(error);
   }

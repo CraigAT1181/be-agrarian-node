@@ -38,7 +38,7 @@ app.post("/users", upload.single('profile_pic'), addUser);
 app.post("/users/login", loginUser);
 app.get("/users/authenticate", getUserInfo);
 app.post("/users/logout", logout)
-app.delete("/users/:user_id", deleteUser);
+app.delete("/users/:user_id/:auth_id", deleteUser);
 
 app.get("/posts/allotments/:allotment_id", getAllotmentPosts);
 app.get("/posts/towns/:town_id", getTownPosts);
