@@ -203,6 +203,26 @@ exports.logUserOut = async () => {
   }
 };
 
+exports.sendPasswordResetEmail = async (email) => {
+  // Supabase built-in password reset function
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.FRONTEND_URL}/reset-password`
+  });
+  
+  if (error) throw error;
+  return { message: "Email sent" };
+};
+
+exports.handleResetPassword = async (access_token, newPassword) => {
+  const { error } = await supabase.auth.updateUser({
+    access_token,
+    password: newPassword
+  });
+
+  if (error) throw error;
+  return { message: "Password updated" };
+};
+
 exports.deletePublicUser = async (publicUserId) => {
   const { error } = await supabase
   .from('users')

@@ -3,7 +3,7 @@ const multer = require('multer');
 const path = require('path');
 
 const { getEndpoints } = require("./controllers/api.controller");
-const { getUsers, addUser, loginUser, deleteUser, getUserInfo, logout } = require("./controllers/users.controller");
+const { getUsers, addUser, loginUser, deleteUser, getUserInfo, logout, requestPasswordReset, resetPassword } = require("./controllers/users.controller");
 const { getAllotmentPosts, getTownPosts, getSinglePost, addPost, deletePost } = require("./controllers/posts.controller");
 const {
   handleCustomErrors,
@@ -38,6 +38,8 @@ app.post("/users", upload.single('profile_pic'), addUser);
 app.post("/users/login", loginUser);
 app.get("/users/authenticate", getUserInfo);
 app.post("/users/logout", logout)
+app.post("/password-reset-request", requestPasswordReset);
+app.post("/reset-password", resetPassword);
 app.delete("/users/:user_id/:auth_id", deleteUser);
 
 app.get("/posts/allotments/:allotment_id", getAllotmentPosts);

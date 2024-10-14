@@ -9,6 +9,8 @@ const {
   deleteAuthUser,
   authenticateUser,
   logUserOut,
+  sendPasswordResetEmail,
+  handleResetPassword,
   fetchTownAllotmentID,
   deleteProfilePicFromStorage,
 } = require("../models/users.model");
@@ -101,6 +103,28 @@ exports.logout = async (req, res, next) => {
     const result = await logUserOut();
 
     res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.requestPasswordReset = async (req, res, next) => {
+  const { email } = req.body;
+  
+  try {
+    await sendPasswordResetEmail(email);
+    return res.status(200).json({ message: "Password reset email sent" });
+  } catch (error) {
+   next(error)
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  const { access_token, newPassword } = req.body;
+  
+  try {
+    await handleResetPassword(access_token, newPassword);
+    return res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
     next(error);
   }
