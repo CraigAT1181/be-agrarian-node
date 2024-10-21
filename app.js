@@ -5,12 +5,14 @@ const path = require('path');
 const { getEndpoints } = require("./controllers/api.controller");
 const { getUsers, addUser, loginUser, deleteUser, getUserInfo, logout, requestPasswordReset, resetPassword } = require("./controllers/users.controller");
 const { getAllotmentPosts, getTownPosts, getSinglePost, addPost, deletePost } = require("./controllers/posts.controller");
+const { getAds, postAd, deleteAd } = require("./controllers/ads.controller");
 const {
   handleCustomErrors,
   handle500errors,
 } = require("./controllers/errors.controller");
 
 const cors = require("cors");
+
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -47,6 +49,10 @@ app.get("/posts/towns/:town_id", getTownPosts);
 app.get("/post/:postId", getSinglePost);
 app.post("/posts", upload.array('media_files'), addPost);
 app.delete("/posts", deletePost);
+
+app.get("/ads", getAds);
+app.post("/ads", upload.array('media_files'), postAd)
+app.delete("/ads", deleteAd);
 
 // Error-handling
 app.use(handleCustomErrors);

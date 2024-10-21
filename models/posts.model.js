@@ -43,7 +43,7 @@ exports.fetchAllotmentPosts = async (allotment_id) => {
   };
 
   exports.fetchTownPosts = async (town_id) => {
-    try {
+    
       const { data, error } = await supabase
         .from("posts")
         .select(
@@ -73,7 +73,7 @@ exports.fetchAllotmentPosts = async (allotment_id) => {
         .order("created_at", { ascending: false });
   
       if (error) {
-        console.error("Error fetching town:", error);
+        console.error("Error fetching town posts:", error);
         throw error;
       }
   
@@ -82,11 +82,7 @@ exports.fetchAllotmentPosts = async (allotment_id) => {
       }
   
       return data;
-    } catch (error) {
-      console.error("Error caught in catch block:", error);
-      throw error;
-    }
-  };
+    };
 
 exports.fetchPostWithParent = async (postId) => {
   console.log("postId received in model:", postId);
@@ -356,5 +352,3 @@ exports.fetchReplies = async (postId) => {
   
     return { error: deleteError };
   };
-  
-  
