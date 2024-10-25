@@ -6,6 +6,7 @@ const { getEndpoints } = require("./controllers/api.controller");
 const { getUsers, addUser, loginUser, deleteUser, getUserInfo, logout, requestPasswordReset, resetPassword } = require("./controllers/users.controller");
 const { getAllotmentPosts, getTownPosts, getSinglePost, addPost, deletePost } = require("./controllers/posts.controller");
 const { getAds, postAd, deleteAd } = require("./controllers/ads.controller");
+const { getConversations, startConversation, exitConversation } = require("./controllers/messaging.controller")
 const {
   handleCustomErrors,
   handle500errors,
@@ -33,6 +34,7 @@ app.use(express.json());
 app.use(cors());
 
 // Routing
+  // Users
 app.get("/", getEndpoints);
 app.get("/api", getEndpoints);
 app.get("/users", getUsers);
@@ -44,15 +46,25 @@ app.post("/password-reset-request", requestPasswordReset);
 app.post("/reset-password", resetPassword);
 app.delete("/users/:user_id/:auth_id", deleteUser);
 
+  // Posts
 app.get("/posts/allotments/:allotment_id", getAllotmentPosts);
 app.get("/posts/towns/:town_id", getTownPosts);
 app.get("/post/:postId", getSinglePost);
 app.post("/posts", upload.array('media_files'), addPost);
 app.delete("/posts", deletePost);
 
+  // Ads
 app.get("/ads", getAds);
-app.post("/ads", upload.array('media_files'), postAd)
+app.post("/ads", upload.array('media_files'), postAd);
 app.delete("/ads", deleteAd);
+
+  // Messaging
+app.get("/users/:user_id/conversations", getConversations);
+app.get("/conversations/:conversation_id/messages");
+app.post("/users/:user_id/conversations", startConversation);
+app.post("/conversations/:conversation_id/messages");
+app.delete("/users/:user_id/conversations/:conversation_id", exitConversation);
+app.delete("/conversations/:conversation_id/messages");
 
 // Error-handling
 app.use(handleCustomErrors);

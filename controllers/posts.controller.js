@@ -101,6 +101,6 @@ if (storageError) {
     
         
       } catch (error) {
-        res.status(500).json({ error: error.message });
+        next(error);
       }
   };
