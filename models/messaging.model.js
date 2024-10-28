@@ -151,3 +151,157 @@ exports.removeConversationParticipant = async (user_id, conversation_id) => {
         await updateIsGroupStatus(conversation_id);
     }
 };
+
+exports.fetchMessages = async (conversation_id) => {
+
+    const {data, error} = await supabase
+    .from('messages')
+    .select(`
+        *,
+        messages_media (
+
+            media_url
+        
+        )
+    `)
+    .eq("conversation_id", conversation_id)
+    .order("sent_at", { ascending: false });
+
+    if (error) {
+        console.error("Error fetching messages:", error);
+        throw error;
+    }
+
+    return data;
+};
+
+exports.postMessage = async (messageDetails) => {
+
+    const {conversation_id, sender_id, content, } = messageDetails;
+
+    const {data, error} = await supabase
+    .from("messages")
+    .insert([{
+        conversation_id,
+        sender_id,
+        content
+    }])
+    .select("*");
+
+    if (error) {
+        console.error("Error posting new message:", error);
+        throw error;
+    }
+
+    return data[0];
+};
+
+exports.uploadMessageMedia = async (message_id, files) => {
+    try {
+      let mediaURLs = [];
+  
+      for (const file of files) {
+        const fileName = `${message_id}/${Date.now()}_${file.originalname}`;
+  
+        const { data, error } = await supabase.storage
+          .from("messages-media")
+          .upload(fileName, file.buffer, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: file.mimetype,
+          });
+  
+        if (error) {
+          console.error("Error uploading media file:", error);
+          throw error;
+        }
+  
+        const { data: publicUrlData } = supabase.storage
+          .from("messages-media")
+          .getPublicUrl(fileName);
+  
+        if (publicUrlData) {
+          mediaURLs.push(publicUrlData.publicUrl);
+        }
+      }
+  
+      return mediaURLs;
+    } catch (error) {
+      console.error("Error in uploadMessageMedia:", error);
+      throw error;
+    }
+  };
+
+  exports.saveMessageMedia = async (message_id, mediaURLs) => {
+    try {
+      const mediaEntries = mediaURLs.map((url) => ({
+        message_id,
+        media_url: url,
+      }));
+      
+  
+      const { data, error } = await supabase
+        .from("messages_media")
+        .insert(mediaEntries);
+  
+      if (error) {
+        console.error("Error saving media URLs:", error);
+        throw error;
+      }
+  
+      return data;
+    } catch (error) {
+      console.error("Error in saveMessageMedia:", error);
+      throw error;
+    }
+  };
+
+  exports.removeMessage = async (message_id) => {
+    try {
+        const { error } = await supabase
+        .from('messages')
+        .delete()
+        .eq('message_id', message_id);
+
+        return { error };
+    } catch (error) {
+        console.error("Error deleting message", error);
+        throw error;
+    }
+  };
+
+  exports.deleteMediaFromStorage = async (message_id) => {
+    const bucketName = 'messages-media';
+    const folderPath = `${message_id}/`;
+  
+    // List files in the folder to check if they exist
+    const { data: files, error: listError } = await supabase
+      .storage
+      .from(bucketName)
+      .list(folderPath);
+  
+    if (listError) {
+      console.error("Error listing files:", listError);
+      return { error: listError };
+    }
+  
+    if (!files || files.length === 0) {
+      console.log("No files found to delete in folder:", folderPath);   
+      return { error: null };
+    }
+  
+    // Extract file paths to delete
+    const filePaths = files.map(file => `${folderPath}${file.name}`);
+  
+    // Attempt to delete the files
+    const { error: deleteError } = await supabase
+      .storage
+      .from(bucketName)
+      .remove(filePaths);
+  
+    if (deleteError) {
+      console.error("Error deleting files:", deleteError);
+    }
+  
+    return { error: deleteError };
+  };

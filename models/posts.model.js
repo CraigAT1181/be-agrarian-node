@@ -214,7 +214,6 @@ exports.fetchReplies = async (postId) => {
   exports.postNewPost = async (postDetails) => {
     const { user_id, parent_id, content, is_reply, town_id, allotment_id, scope } = postDetails;
   
-    try {
       const { data, error } = await supabase
         .from("posts")
         .insert([
@@ -236,10 +235,6 @@ exports.fetchReplies = async (postId) => {
       }
   
       return data[0];
-    } catch (error) {
-      console.error("Error in postNewPost:", error);
-      throw error;
-    }
   };
 
   exports.uploadPostMedia = async (post_id, files) => {
@@ -319,7 +314,7 @@ exports.fetchReplies = async (postId) => {
 
   exports.deleteMediaFromStorage = async (post_id) => {
     const bucketName = 'post-media';
-    const folderPath = `${post_id}/`; // Assuming folder named after post_id
+    const folderPath = `${post_id}/`;
   
     // List files in the folder to check if they exist
     const { data: files, error: listError } = await supabase
@@ -334,7 +329,7 @@ exports.fetchReplies = async (postId) => {
   
     if (!files || files.length === 0) {
       console.log("No files found to delete in folder:", folderPath);   
-      return { error: null };  // No files to delete
+      return { error: null }; 
     }
   
     // Extract file paths to delete
