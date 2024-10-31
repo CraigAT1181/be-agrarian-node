@@ -259,49 +259,49 @@ exports.uploadMessageMedia = async (message_id, files) => {
   exports.removeMessage = async (message_id) => {
     try {
         const { error } = await supabase
-        .from('messages')
-        .delete()
-        .eq('message_id', message_id);
+            .from('messages')
+            .delete()
+            .eq('message_id', message_id);
 
-        return { error };
+        return { error: error || null }; // Explicitly return { error: null } if no error
     } catch (error) {
         console.error("Error deleting message", error);
         throw error;
     }
-  };
+};
 
-  exports.deleteMediaFromStorage = async (message_id) => {
+exports.deleteMediaFromStorage = async (message_id) => {
     const bucketName = 'messages-media';
     const folderPath = `${message_id}/`;
-  
+
     // List files in the folder to check if they exist
     const { data: files, error: listError } = await supabase
-      .storage
-      .from(bucketName)
-      .list(folderPath);
-  
+        .storage
+        .from(bucketName)
+        .list(folderPath);
+
     if (listError) {
-      console.error("Error listing files:", listError);
-      return { error: listError };
+        console.error(`Error listing files in ${bucketName} for message ${message_id}:`, listError);
+        return { error: listError };
     }
-  
+
     if (!files || files.length === 0) {
-      console.log("No files found to delete in folder:", folderPath);   
-      return { error: null };
+        console.log(`No files found to delete in folder: ${folderPath}`);   
+        return { error: null }; // No files found; no error
     }
-  
+
     // Extract file paths to delete
     const filePaths = files.map(file => `${folderPath}${file.name}`);
-  
+
     // Attempt to delete the files
     const { error: deleteError } = await supabase
-      .storage
-      .from(bucketName)
-      .remove(filePaths);
-  
+        .storage
+        .from(bucketName)
+        .remove(filePaths);
+
     if (deleteError) {
-      console.error("Error deleting files:", deleteError);
+        console.error(`Error deleting files in ${bucketName} for message ${message_id}:`, deleteError);
     }
-  
-    return { error: deleteError };
-  };
+
+    return { error: deleteError || null };
+};
