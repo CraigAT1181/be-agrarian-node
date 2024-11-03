@@ -6,7 +6,8 @@ const { getEndpoints } = require("./controllers/api.controller");
 const { getUsers, addUser, loginUser, deleteUser, getUserInfo, logout, requestPasswordReset, resetPassword } = require("./controllers/users.controller");
 const { getAllotmentPosts, getTownPosts, getSinglePost, addPost, deletePost } = require("./controllers/posts.controller");
 const { getAds, postAd, deleteAd } = require("./controllers/ads.controller");
-const { getConversations, startConversation, exitConversation, getMessages, addMessage, deleteMessage } = require("./controllers/messaging.controller")
+const { getConversations, startConversation, exitConversation, getMessages, addMessage, deleteMessage } = require("./controllers/messaging.controller");
+const { getNotifications, addNotification, markAsRead } = require("./controllers/notification.controller");
 const {
   handleCustomErrors,
   handle500errors,
@@ -65,6 +66,11 @@ app.post("/users/:user_id/conversations", startConversation);
 app.post("/conversations/:conversation_id/messages", upload.array('media_files'), addMessage);
 app.delete("/users/:user_id/conversations/:conversation_id", exitConversation);
 app.delete("/conversations/:conversation_id/messages", deleteMessage);
+
+  // Notifications
+app.get("/notifications", getNotifications);
+app.post("/notifications", addNotification);
+app.patch("/notifications/:notification_id", markAsRead)
 
 // Error-handling
 app.use(handleCustomErrors);
