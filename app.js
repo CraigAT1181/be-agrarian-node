@@ -68,8 +68,8 @@ app.delete("/users/:user_id/conversations/:conversation_id", exitConversation);
 app.delete("/conversations/:conversation_id/messages", deleteMessage);
 
   // Notifications
-app.get("/notifications", getNotifications);
-app.post("/notifications", addNotification);
+app.get("/users/:userId/notifications", getNotifications);
+app.post("/users/:userId/notifications", addNotification);
 app.patch("/notifications/:notification_id", markAsRead)
 
 // Error-handling

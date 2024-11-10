@@ -1,115 +1,109 @@
 const supabase = require("../config/supabase");
 
 exports.processNotifications = async (notifications) => {
-    console.log("Received in process", notifications);
-    if (notifications.length === 0) return [];
+  if (notifications.length === 0) return [];
 
-    return await Promise.all(
-        notifications.map(async (notification) => {
+  return await Promise.all(
+    notifications.map(async (notification) => {
+      let associatedData;
 
-            let associatedData;
+      switch (notification.associated_type) {
+        case "post":
+          const { data: postData, error: postError } = await supabase
+            .from("posts")
+            .select("content, post_id, users(user_name)")
+            .eq("post_id", notification.associated_id);
 
-        switch (notification.associated_type) {
+          if (postError) {
+            console.error("Failed to fetch post:", postError);
+            throw postError;
+          }
 
-            case 'post':
-                
-            const {data: postData, error: postError} = await supabase
-                .from("posts")
-                .select("content, post_id, users(user_name)")
-                .eq("post_id", notification.associated_id)
-                
+          associatedData = postData;
 
-            if (postError) {
-                console.error("Failed to fetch post:", postError);
-                throw postError; 
-            }
-            
-            associatedData = postData;
+          break;
 
-            break;
+        case "message":
+          const { data: messageData, error: messageError } = await supabase
+            .from("messages")
+            .select("content, message_id, users(user_name)")
+            .eq("message_id", notification.associated_id);
 
-            case 'message':
-                
-                const {data: messageData, error: messageError} = await supabase
-                    .from("messages")
-                    .select("content, message_id, users(user_name)")
-                    .eq("message_id", notification.associated_id)
-                    
+          if (messageError) {
+            console.error("Failed to fetch message:", messageError);
+            throw messageError;
+          }
 
-                if (messageError) {
-                    console.error("Failed to fetch message:", messageError);
-                    throw messageError; 
-                }
-                
-                associatedData = messageData;
+          associatedData = messageData;
 
-                break;
-        
-            default:
-                console.warn(`Unsupported associated_type: ${notification.associated_type}`);
-                associatedData = null; 
+          break;
 
-                break;
-        }
+        default:
+          console.warn(
+            `Unsupported associated_type: ${notification.associated_type}`
+          );
+          associatedData = null;
 
-        return {
-            ...notification,
-            associated_data: associatedData,
-        }
+          break;
+      }
 
-
-    }))
+      return {
+        ...notification,
+        associated_data: associatedData,
+      };
+    })
+  );
 };
 
 exports.fetchNotifications = async (user_id) => {
+  const { data: notifications, error } = await supabase
+    .from("notifications")
+    .select("*")
+    .eq("user_id", user_id)
+    .order("created_at", { ascending: false });
 
-    const { data: notifications, error } = await supabase
-        .from("notifications")
-        .select("*")
-        .eq("user_id", user_id)
-        .order("created_at", { ascending: false });
+  if (error) {
+    console.error("Failed to fetch notifications", error);
+    throw error;
+  }
 
-    if (error) {
-        console.error("Failed to fetch notifications", error);
-        throw error;
-    }
-console.log("returned from fetchNotifications", notifications);
-    return notifications;
-
+  return notifications;
 };
 
 exports.postNotification = async (notificationDetails) => {
+  const { userId, associatedId, associatedType, notificationType } =
+    notificationDetails;
 
-    const { userId, associatedId, associatedType, notificationType } = notificationDetails;
+  const { data, error } = await supabase
+    .from("notifications")
+    .insert([
+      {
+        user_id: userId,
+        associated_id: associatedId,
+        associated_type: associatedType,
+        notification_type: notificationType,
+      },
+    ])
+    .select("*");
 
-    const { data, error } = await supabase
-        .from("notifications")
-        .insert([{
-            user_id: userId,
-            associated_id: associatedId,
-            associated_type: associatedType,
-            notification_type: notificationType,
-        }])
-        .select("*");
+  if (error) {
+    console.error("Failed to add notification", error);
+    throw error;
+  }
 
-        if (error) {
-            console.error("Failed to add notification", error);
-            throw error;
-        }
-
-        return data[0];
-}
+  return data[0];
+};
 
 exports.markNotificationAsRead = async (notification_id) => {
-    const { data, error } = await supabase
-      .from("notifications")
-      .update({ is_read: true })
-      .eq("notification_id", notification_id);
-  
-    if (error) {
-      console.error("Error marking notification as read:", error);
-      throw new Error("Failed to mark notification as read");
-    }
-  
-    return data;
-  };
+  const { data, error } = await supabase
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("notification_id", notification_id);
+
+  if (error) {
+    console.error("Error marking notification as read:", error);
+    throw new Error("Failed to mark notification as read");
+  }
+
+  return data;
+};
