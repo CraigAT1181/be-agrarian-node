@@ -11,7 +11,7 @@ exports.processNotifications = async (notifications) => {
         case "post":
           const { data: postData, error: postError } = await supabase
             .from("posts")
-            .select("content, post_id, users(user_name)")
+            .select("content, post_id, users(profile_pic)")
             .eq("post_id", notification.associated_id);
 
           if (postError) {
@@ -26,7 +26,7 @@ exports.processNotifications = async (notifications) => {
         case "message":
           const { data: messageData, error: messageError } = await supabase
             .from("messages")
-            .select("content, message_id, users(user_name)")
+            .select("content, message_id, users(profile_pic)")
             .eq("message_id", notification.associated_id);
 
           if (messageError) {
